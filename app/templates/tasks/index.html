@@ -1,0 +1,245 @@
+{% extends "base.html" %}
+
+{% block title %}My Tasks - Task Manager{% endblock %}
+
+{% block content %}
+<div class="container">
+    <!-- Header Section -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3 mb-0">My Tasks</h1>
+        <a href="{{ url_for('tasks.create') }}" class="btn btn-primary">
+            <i class="fas fa-plus me-2"></i>New Task
+        </a>
+    </div>
+
+    <!-- Search and Filter Section -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="GET" class="row g-3">
+                <div class="col-md-4">
+                    <div class="input-group">
+                        <span class="input-group-text">
+                            <i class="fas fa-search"></i>
+                        </span>
+                        <input type="text" class="form-control" name="search" 
+                               placeholder="Search tasks..." value="{{ request.args.get('search', '') }}">
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <select class="form-select" name="status">
+                        <option value="">All Statuses</option>
+                        <option value="pending" {% if request.args.get('status') == 'pending' %}selected{% endif %}>Pending</option>
+                        <option value="in_progress" {% if request.args.get('status') == 'in_progress' %}selected{% endif %}>In Progress</option>
+                        <option value="completed" {% if request.args.get('status') == 'completed' %}selected{% endif %}>Completed</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <select class="form-select" name="priority">
+                        <option value="">All Priorities</option>
+                        <option value="low" {% if request.args.get('priority') == 'low' %}selected{% endif %}>Low</option>
+                        <option value="medium" {% if request.args.get('priority') == 'medium' %}selected{% endif %}>Medium</option>
+                        <option value="high" {% if request.args.get('priority') == 'high' %}selected{% endif %}>High</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <select class="form-select" name="due_date">
+                        <option value="">All Due Dates</option>
+                        <option value="today" {% if request.args.get('due_date') == 'today' %}selected{% endif %}>Today</option>
+                        <option value="week" {% if request.args.get('due_date') == 'week' %}selected{% endif %}>This Week</option>
+                        <option value="month" {% if request.args.get('due_date') == 'month' %}selected{% endif %}>This Month</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <select class="form-select" name="category">
+                        <option value="">All Categories</option>
+                        {% for category in categories %}
+                        <option value="{{ category.id }}" {% if request.args.get('category')|int == category.id %}selected{% endif %}>
+                            {{ category.name }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-12">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-filter me-2"></i>Apply Filters
+                    </button>
+                    <a href="{{ url_for('tasks.index') }}" class="btn btn-outline-secondary">
+                        <i class="fas fa-times me-2"></i>Clear Filters
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Sorting Controls -->
+    <div class="d-flex justify-content-end mb-3">
+        <div class="btn-group">
+            <button type="button" class="btn btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown">
+                <i class="fas fa-sort me-2"></i>Sort by
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end">
+                <li>
+                    <a class="dropdown-item {% if sort_by == 'due_date' %}active{% endif %}" 
+                       href="{{ url_for('tasks.index', sort_by='due_date', sort_order='asc' if sort_by != 'due_date' or sort_order == 'desc' else 'desc', **request.args) }}">
+                        Due Date {% if sort_by == 'due_date' %}<i class="fas fa-{{ 'sort-up' if sort_order == 'asc' else 'sort-down' }} ms-2"></i>{% endif %}
+                    </a>
+                </li>
+                <li>
+                    <a class="dropdown-item {% if sort_by == 'priority' %}active{% endif %}" 
+                       href="{{ url_for('tasks.index', sort_by='priority', sort_order='asc' if sort_by != 'priority' or sort_order == 'desc' else 'desc', **request.args) }}">
+                        Priority {% if sort_by == 'priority' %}<i class="fas fa-{{ 'sort-up' if sort_order == 'asc' else 'sort-down' }} ms-2"></i>{% endif %}
+                    </a>
+                </li>
+                <li>
+                    <a class="dropdown-item {% if sort_by == 'status' %}active{% endif %}" 
+                       href="{{ url_for('tasks.index', sort_by='status', sort_order='asc' if sort_by != 'status' or sort_order == 'desc' else 'desc', **request.args) }}">
+                        Status {% if sort_by == 'status' %}<i class="fas fa-{{ 'sort-up' if sort_order == 'asc' else 'sort-down' }} ms-2"></i>{% endif %}
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Tasks List -->
+    <div class="row">
+        {% for task in tasks %}
+        <div class="col-md-6 col-lg-4 mb-4">
+            <div class="card h-100 task-card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <h5 class="card-title mb-0">
+                            <a href="{{ url_for('tasks.view', id=task.id) }}" class="text-decoration-none">
+                                {{ task.title }}
+                            </a>
+                        </h5>
+                        <div class="dropdown">
+                            <button class="btn btn-link text-dark p-0" data-bs-toggle="dropdown">
+                                <i class="fas fa-ellipsis-v"></i>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end">
+                                <li>
+                                    <a class="dropdown-item" href="{{ url_for('tasks.edit', id=task.id) }}">
+                                        <i class="fas fa-edit me-2"></i>Edit
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item text-danger" href="{{ url_for('tasks.delete', id=task.id) }}"
+                                       onclick="return confirm('Are you sure you want to delete this task?')">
+                                        <i class="fas fa-trash me-2"></i>Delete
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <p class="card-text text-muted small mb-3">
+                        {{ task.description|truncate(100) if task.description else 'No description' }}
+                    </p>
+
+                    <div class="d-flex flex-wrap gap-2 mb-3">
+                        <span class="badge bg-{{ task.status|status_color }}">
+                            {{ task.status|title }}
+                        </span>
+                        <span class="badge bg-{{ task.priority|priority_color }}">
+                            {{ task.priority|title }}
+                        </span>
+                        {% if task.category %}
+                        <span class="badge" style="background-color: {{ task.category.color }}">
+                            {{ task.category.name }}
+                        </span>
+                        {% endif %}
+                    </div>
+
+                    <div class="d-flex justify-content-between align-items-center">
+                        <small class="text-muted">
+                            {% if task.due_date %}
+                            <i class="fas fa-calendar me-1"></i>
+                            {{ task.due_date.strftime('%Y-%m-%d') }}
+                            {% endif %}
+                        </small>
+                        <div class="text-muted">
+                            <small>
+                                <i class="fas fa-comments me-1"></i>
+                                {{ task.comments|length }}
+                                <i class="fas fa-paperclip ms-2 me-1"></i>
+                                {{ task.attachments|length }}
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% else %}
+        <div class="col-12">
+            <div class="alert alert-info">
+                <i class="fas fa-info-circle me-2"></i>No tasks found. Create your first task!
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Pagination -->
+    {% if pagination.pages > 1 %}
+    <nav aria-label="Task pagination" class="mt-4">
+        <ul class="pagination justify-content-center">
+            {% if pagination.has_prev %}
+            <li class="page-item">
+                <a class="page-link" href="{{ url_for('tasks.index', page=pagination.prev_num, **request.args) }}">
+                    <i class="fas fa-chevron-left"></i>
+                </a>
+            </li>
+            {% else %}
+            <li class="page-item disabled">
+                <span class="page-link">
+                    <i class="fas fa-chevron-left"></i>
+                </span>
+            </li>
+            {% endif %}
+
+            {% for page in pagination.iter_pages() %}
+                {% if page %}
+                    <li class="page-item {% if page == pagination.page %}active{% endif %}">
+                        <a class="page-link" href="{{ url_for('tasks.index', page=page, **request.args) }}">{{ page }}</a>
+                    </li>
+                {% else %}
+                    <li class="page-item disabled">
+                        <span class="page-link">...</span>
+                    </li>
+                {% endif %}
+            {% endfor %}
+
+            {% if pagination.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="{{ url_for('tasks.index', page=pagination.next_num, **request.args) }}">
+                    <i class="fas fa-chevron-right"></i>
+                </a>
+            </li>
+            {% else %}
+            <li class="page-item disabled">
+                <span class="page-link">
+                    <i class="fas fa-chevron-right"></i>
+                </span>
+            </li>
+            {% endif %}
+        </ul>
+    </nav>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Add active class to current filter options
+    document.addEventListener('DOMContentLoaded', function() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const filterSelects = document.querySelectorAll('select[name]');
+        
+        filterSelects.forEach(select => {
+            const paramValue = urlParams.get(select.name);
+            if (paramValue) {
+                select.value = paramValue;
+            }
+        });
+    });
+</script>
+{% endblock %} 

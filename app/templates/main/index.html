@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+
+{% block title %}Welcome - Task Manager{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-8 text-center">
+            <h1 class="display-4 mb-4">Welcome to Task Manager</h1>
+            <p class="lead mb-4">Organize your tasks, manage your time, and boost your productivity.</p>
+            
+            {% if not current_user.is_authenticated %}
+            <div class="d-grid gap-3 d-sm-flex justify-content-sm-center">
+                <a href="{{ url_for('auth.login') }}" class="btn btn-primary btn-lg px-4 gap-3">
+                    <i class="fas fa-sign-in-alt me-2"></i>Login
+                </a>
+                <a href="{{ url_for('auth.register') }}" class="btn btn-outline-primary btn-lg px-4">
+                    <i class="fas fa-user-plus me-2"></i>Register
+                </a>
+            </div>
+            {% else %}
+            <div class="d-grid gap-3 d-sm-flex justify-content-sm-center">
+                <a href="{{ url_for('tasks.index') }}" class="btn btn-primary btn-lg px-4 gap-3">
+                    <i class="fas fa-tasks me-2"></i>View Tasks
+                </a>
+                <a href="{{ url_for('tasks.create') }}" class="btn btn-outline-primary btn-lg px-4">
+                    <i class="fas fa-plus me-2"></i>Create Task
+                </a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="row mt-5">
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <i class="fas fa-tasks fa-3x text-primary mb-3"></i>
+                    <h3 class="card-title">Task Management</h3>
+                    <p class="card-text">Create, organize, and track your tasks efficiently.</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <i class="fas fa-tags fa-3x text-primary mb-3"></i>
+                    <h3 class="card-title">Categories</h3>
+                    <p class="card-text">Organize tasks into categories for better management.</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <i class="fas fa-comments fa-3x text-primary mb-3"></i>
+                    <h3 class="card-title">Comments</h3>
+                    <p class="card-text">Add comments and track task progress.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 
