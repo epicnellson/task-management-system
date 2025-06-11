@@ -6,7 +6,7 @@ buildCommand = "pip install -r requirements.txt"
 startCommand = "gunicorn app:create_app()"
 healthcheckPath = "/"
 healthcheckTimeout = 100
-restartPolicyType = "on-failure"
+restartPolicy = "on-failure"
 restartPolicyMaxRetries = 10
 
 [env]
