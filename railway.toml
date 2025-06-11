@@ -1,6 +1,7 @@
 [build]
 builder = "DOCKERFILE"
 dockerfilePath = "Dockerfile"
+buildCommand = "docker build --no-cache -t app ."
 
 [deploy]
 startCommand = "gunicorn --workers 4 --bind 0.0.0.0:$PORT --timeout 120 --access-logfile - --error-logfile - app:create_app()"
@@ -12,4 +13,5 @@ restartPolicyMaxRetries = 10
 [deploy.env]
 FLASK_APP = "app"
 FLASK_ENV = "production"
-PYTHONUNBUFFERED = "1" 
+PYTHONUNBUFFERED = "1"
+PORT = "8000" 
