@@ -1,0 +1,15 @@
+[Unit]
+Description=Task Management System
+After=network.target postgresql.service redis.service
+
+[Service]
+User=taskmanager
+Group=taskmanager
+WorkingDirectory=/path/to/your/app
+Environment="PATH=/path/to/your/app/venv/bin"
+EnvironmentFile=/path/to/your/app/.env
+ExecStart=/path/to/your/app/venv/bin/gunicorn --workers 4 --bind 127.0.0.1:8000 "app:create_app('production')"
+Restart=always
+
+[Install]
+WantedBy=multi-user.target 

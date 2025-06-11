@@ -2,8 +2,15 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Task Manager{% endblock %}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#007bff">
+    <meta name="description" content="A powerful task management application">
+    <link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}">
+    <link rel="apple-touch-icon" href="{{ url_for('static', filename='icons/icon-192x192.png') }}">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="apple-mobile-web-app-title" content="Task Manager">
+    <title>{% block title %}Task Manager{% endblock %} - Task Manager</title>
     
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -13,64 +20,113 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <!-- Custom CSS -->
     <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
+    <style>
+        .splash-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #007bff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            transition: opacity 0.5s ease-out;
+        }
+        .splash-screen.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+        .splash-screen img {
+            width: 120px;
+            height: 120px;
+            animation: pulse 1.5s infinite;
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+    </style>
     {% block styles %}{% endblock %}
 </head>
 <body>
+    <div class="splash-screen" id="splashScreen">
+        <img src="{{ url_for('static', filename='icons/icon.svg') }}" alt="Task Manager">
+    </div>
     <!-- Navigation -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary sticky-top">
         <div class="container">
-            <a class="navbar-brand" href="{{ url_for('main.index') }}">Task Manager</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <a class="navbar-brand" href="{{ url_for('main.index') }}">
+                <i class="fas fa-tasks me-2"></i>Task Manager
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav me-auto">
                     {% if current_user.is_authenticated %}
                     <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('tasks.index') }}">Tasks</a>
+                        <a class="nav-link" href="{{ url_for('tasks.index') }}">
+                            <i class="fas fa-list-check me-1"></i>Tasks
+                        </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('categories.index') }}">Categories</a>
+                        <a class="nav-link" href="{{ url_for('categories.index') }}">
+                            <i class="fas fa-folder me-1"></i>Categories
+                        </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('templates.index') }}">Templates</a>
+                        <a class="nav-link" href="{{ url_for('templates.index') }}">
+                            <i class="fas fa-copy me-1"></i>Templates
+                        </a>
                     </li>
                     {% endif %}
                 </ul>
                 <ul class="navbar-nav">
                     {% if current_user.is_authenticated %}
                     <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                             <i class="fas fa-bell"></i>
                             <span class="badge bg-danger" id="notificationBadge" style="display: none;">0</span>
                         </a>
-                        <div class="dropdown-menu dropdown-menu-end" id="notificationDropdown" style="width: 300px;">
-                            <div class="dropdown-header">Notifications</div>
+                        <div class="dropdown-menu dropdown-menu-end notification-dropdown" id="notificationDropdown">
+                            <div class="dropdown-header d-flex justify-content-between align-items-center">
+                                <span>Notifications</span>
+                                <button class="btn btn-sm btn-link text-decoration-none" onclick="markAllNotificationsRead()">
+                                    Mark all read
+                                </button>
+                            </div>
                             <div id="notificationList" class="notification-list">
                                 <!-- Notifications will be loaded here -->
                             </div>
-                            <div class="dropdown-divider"></div>
-                            <a class="dropdown-item text-center" href="#" onclick="markAllNotificationsRead()">
-                                Mark all as read
-                            </a>
                         </div>
                     </li>
                     <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown">
-                            {{ current_user.username }}
+                        <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fas fa-user-circle me-1"></i>{{ current_user.username }}
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end">
-                            <li><a class="dropdown-item" href="{{ url_for('auth.profile') }}">Profile</a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('auth.profile') }}">
+                                <i class="fas fa-user me-2"></i>Profile
+                            </a></li>
                             <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item" href="{{ url_for('auth.logout') }}">Logout</a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('auth.logout') }}">
+                                <i class="fas fa-sign-out-alt me-2"></i>Logout
+                            </a></li>
                         </ul>
                     </li>
                     {% else %}
                     <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('auth.login') }}">Login</a>
+                        <a class="nav-link" href="{{ url_for('auth.login') }}">
+                            <i class="fas fa-sign-in-alt me-1"></i>Login
+                        </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('auth.register') }}">Register</a>
+                        <a class="nav-link" href="{{ url_for('auth.register') }}">
+                            <i class="fas fa-user-plus me-1"></i>Register
+                        </a>
                     </li>
                     {% endif %}
                 </ul>
@@ -82,10 +138,10 @@
     {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
             {% for category, message in messages %}
-                <div class="container">
+                <div class="container mt-3">
                     <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
                         {{ message }}
-                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                     </div>
                 </div>
             {% endfor %}
@@ -120,6 +176,25 @@
             alerts.forEach(alert => {
                 alert.classList.add('fade-in');
             });
+        });
+
+        // Handle mobile menu
+        document.addEventListener('DOMContentLoaded', function() {
+            const navbarToggler = document.querySelector('.navbar-toggler');
+            const navbarCollapse = document.querySelector('.navbar-collapse');
+            
+            if (navbarToggler && navbarCollapse) {
+                navbarToggler.addEventListener('click', function() {
+                    navbarCollapse.classList.toggle('show');
+                });
+
+                // Close menu when clicking outside
+                document.addEventListener('click', function(event) {
+                    if (!navbarCollapse.contains(event.target) && !navbarToggler.contains(event.target)) {
+                        navbarCollapse.classList.remove('show');
+                    }
+                });
+            }
         });
     </script>
     {% block scripts %}
@@ -210,5 +285,69 @@
     setInterval(loadNotifications, 60000);
     </script>
     {% endblock %}
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    <script>
+        // Push notification registration
+        async function registerPushNotifications() {
+            try {
+                const registration = await navigator.serviceWorker.ready;
+                const subscription = await registration.pushManager.subscribe({
+                    userVisibleOnly: true,
+                    applicationServerKey: '{{ config.VAPID_PUBLIC_KEY }}'
+                });
+                
+                // Send subscription to server
+                await fetch('/notifications/subscribe', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(subscription)
+                });
+                
+                console.log('Push notification subscription successful');
+            } catch (error) {
+                console.error('Push notification subscription failed:', error);
+            }
+        }
+
+        // Register push notifications when service worker is ready
+        if ('serviceWorker' in navigator && 'PushManager' in window) {
+            navigator.serviceWorker.ready.then(registration => {
+                if (Notification.permission === 'granted') {
+                    registerPushNotifications();
+                } else if (Notification.permission !== 'denied') {
+                    Notification.requestPermission().then(permission => {
+                        if (permission === 'granted') {
+                            registerPushNotifications();
+                        }
+                    });
+                }
+            });
+        }
+
+        // Hide splash screen when page is loaded
+        window.addEventListener('load', () => {
+            const splashScreen = document.getElementById('splashScreen');
+            setTimeout(() => {
+                splashScreen.classList.add('hidden');
+            }, 1000);
+        });
+
+        // Service Worker registration
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/static/sw.js')
+                    .then(registration => {
+                        console.log('ServiceWorker registration successful');
+                        // Register push notification service worker
+                        registration.register('/static/push-sw.js');
+                    })
+                    .catch(err => {
+                        console.log('ServiceWorker registration failed: ', err);
+                    });
+            });
+        }
+    </script>
 </body>
 </html> 

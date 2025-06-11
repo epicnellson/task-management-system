@@ -18,7 +18,7 @@ class Task(db.Model):
     # Relationships
     category = db.relationship('Category', backref=db.backref('tasks', lazy=True))
     comments = db.relationship('Comment', backref='task', lazy=True, cascade='all, delete-orphan')
-    attachments = db.relationship('Attachment', backref='task_attachments', lazy=True, cascade='all, delete-orphan')
+    attachments = db.relationship('Attachment', backref=db.backref('task_attachments', overlaps="attachments,task_attachments"), lazy=True, cascade='all, delete-orphan', overlaps="attachments,task_attachments")
     
     def __repr__(self):
         return f'<Task {self.title}>'

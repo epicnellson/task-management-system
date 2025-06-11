@@ -1,9 +1,11 @@
-from flask import Blueprint, render_template, redirect, url_for, flash, request
+from flask import Blueprint, render_template, redirect, url_for, flash, request, current_app
 from flask_login import login_user, logout_user, login_required, current_user
+from werkzeug.security import generate_password_hash, check_password_hash
 from app.models.user import User
 from app import db
 from urllib.parse import urlparse
 from app.forms import ProfileForm
+import os
 
 auth = Blueprint('auth', __name__)
 
@@ -73,13 +75,60 @@ def logout():
 @auth.route('/profile', methods=['GET', 'POST'])
 @login_required
 def profile():
-    form = ProfileForm(obj=current_user)
+    form = ProfileForm()
     if form.validate_on_submit():
         current_user.username = form.username.data
         current_user.email = form.email.data
         if form.password.data:
-            current_user.set_password(form.password.data)
+            current_user.password = generate_password_hash(form.password.data)
         db.session.commit()
         flash('Your profile has been updated.', 'success')
-        return redirect(url_for('main.dashboard'))
-    return render_template('auth/profile.html', form=form) 
+        return redirect(url_for('auth.profile'))
+    elif request.method == 'GET':
+        form.username.data = current_user.username
+        form.email.data = current_user.email
+    return render_template('auth/profile.html', form=form)
+
+@auth.route('/delete-account', methods=['GET', 'POST'])
+@login_required
+def delete_account():
+    if request.method == 'POST':
+        # Verify password before deletion
+        if not check_password_hash(current_user.password, request.form.get('password')):
+            flash('Incorrect password. Please try again.', 'danger')
+            return redirect(url_for('auth.delete_account'))
+        
+        # Delete user's tasks, comments, and other related data
+        for task in current_user.tasks:
+            # Delete task attachments
+            for attachment in task.attachments:
+                if attachment.file_path and os.path.exists(attachment.file_path):
+                    os.remove(attachment.file_path)
+                db.session.delete(attachment)
+            
+            # Delete task comments
+            for comment in task.comments:
+                db.session.delete(comment)
+            
+            db.session.delete(task)
+        
+        # Delete user's categories
+        for category in current_user.categories:
+            db.session.delete(category)
+        
+        # Delete user's notifications
+        for notification in current_user.notifications:
+            db.session.delete(notification)
+        
+        # Delete user's templates
+        for template in current_user.templates:
+            db.session.delete(template)
+        
+        # Delete the user
+        db.session.delete(current_user)
+        db.session.commit()
+        
+        flash('Your account has been permanently deleted.', 'success')
+        return redirect(url_for('main.index'))
+    
+    return render_template('auth/delete_account.html') 

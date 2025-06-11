@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+
+{% block title %}Delete Account - Task Manager{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header bg-danger text-white">
+                <h4 class="mb-0"><i class="fas fa-exclamation-triangle me-2"></i>Delete Account</h4>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-warning">
+                    <h5 class="alert-heading"><i class="fas fa-exclamation-circle me-2"></i>Warning!</h5>
+                    <p>You are about to permanently delete your account. This action cannot be undone. All your data including:</p>
+                    <ul>
+                        <li>Tasks and task history</li>
+                        <li>Categories and templates</li>
+                        <li>Comments and attachments</li>
+                        <li>Notifications and settings</li>
+                    </ul>
+                    <p>will be permanently deleted.</p>
+                </div>
+
+                <form method="POST" action="{{ url_for('auth.delete_account') }}" class="mt-4">
+                    <div class="mb-3">
+                        <label for="password" class="form-label">Enter your password to confirm:</label>
+                        <input type="password" class="form-control" id="password" name="password" required>
+                    </div>
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-danger" onclick="return confirm('Are you absolutely sure you want to delete your account? This action cannot be undone.')">
+                            <i class="fas fa-trash-alt me-2"></i>Permanently Delete Account
+                        </button>
+                        <a href="{{ url_for('auth.profile') }}" class="btn btn-secondary">
+                            <i class="fas fa-times me-2"></i>Cancel
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

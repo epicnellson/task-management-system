@@ -15,7 +15,7 @@ class Attachment(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     
     # Relationships
-    task = db.relationship('Task', backref='task_attachments')
+    task = db.relationship('Task', backref='task_attachments', overlaps="attachments,task_attachments")
     user = db.relationship('User', backref='attachments')
     
     def __repr__(self):
