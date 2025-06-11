@@ -1,0 +1,11 @@
+[phases.setup]
+nixPkgs = ["python39", "gcc"]
+
+[phases.install]
+cmds = ["pip install --no-cache-dir -r requirements.txt"]
+
+[phases.build]
+cmds = ["pip install --no-cache-dir -r requirements.txt"]
+
+[start]
+cmd = "gunicorn --workers 4 --bind 0.0.0.0:$PORT --timeout 120 app:create_app()" 
