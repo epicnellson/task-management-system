@@ -56,27 +56,19 @@ def create_app(config_class=Config):
     login_manager.login_message_category = 'info'
 
     # Register blueprints
-    from app.routes.main import bp as main_bp
-    from app.routes.auth import auth as auth_bp
-    from app.routes.tasks import tasks as tasks_bp
-    from app.routes.categories import categories as categories_bp
-    from app.routes.comments import comments as comments_bp
-    from app.routes.notifications import notifications as notifications_bp
-    from app.routes.attachments import attachments as attachments_bp
-    from app.routes.templates import templates as templates_bp
-    from app.routes.export import export as export_bp
-    from app.routes.activity import activity as activity_bp
+    from app.routes.auth import auth
+    from app.routes.main import main
+    from app.routes.tasks import tasks
+    from app.routes.categories import categories
+    from app.routes.templates import templates
+    from app.routes.notifications import notifications
     
-    app.register_blueprint(main_bp)
-    app.register_blueprint(auth_bp)
-    app.register_blueprint(tasks_bp)
-    app.register_blueprint(categories_bp)
-    app.register_blueprint(comments_bp)
-    app.register_blueprint(notifications_bp)
-    app.register_blueprint(attachments_bp)
-    app.register_blueprint(templates_bp)
-    app.register_blueprint(export_bp)
-    app.register_blueprint(activity_bp)
+    app.register_blueprint(auth, url_prefix='/auth')
+    app.register_blueprint(main)
+    app.register_blueprint(tasks)
+    app.register_blueprint(categories)
+    app.register_blueprint(templates)
+    app.register_blueprint(notifications)
 
     # Register custom filters
     @app.template_filter('status_color')

@@ -18,4 +18,10 @@ class Config:
     VAPID_PRIVATE_KEY = os.environ.get('VAPID_PRIVATE_KEY') or 'your-vapid-private-key'
     VAPID_CLAIMS = {
         "sub": "mailto:your-email@example.com"
-    } 
+    }
+
+class TestingConfig(Config):
+    TESTING = True
+    SQLALCHEMY_DATABASE_URI = 'sqlite:///task_manager.db'
+    WTF_CSRF_ENABLED = False
+    SERVER_NAME = 'localhost.localdomain' 
